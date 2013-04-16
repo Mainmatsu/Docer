@@ -1,0 +1,5 @@
+c:\users\морозов\documents\visual studio 2012\Projects\CodeDoc\CodeDoc\bin\CodeDoc.dll
+c:\users\морозов\documents\visual studio 2012\Projects\CodeDoc\CodeDoc\bin\CodeDoc.pdb
+c:\users\морозов\documents\visual studio 2012\Projects\CodeDoc\CodeDoc\obj\Debug\CodeDoc.csprojResolveAssemblyReference.cache
+c:\users\морозов\documents\visual studio 2012\Projects\CodeDoc\CodeDoc\obj\Debug\CodeDoc.dll
+c:\users\морозов\documents\visual studio 2012\Projects\CodeDoc\CodeDoc\obj\Debug\CodeDoc.pdb
