@@ -3,3 +3,8 @@ c:\users\морозов\documents\visual studio 2012\Projects\CodeDoc\CodeDoc\bi
 c:\users\морозов\documents\visual studio 2012\Projects\CodeDoc\CodeDoc\obj\Debug\CodeDoc.csprojResolveAssemblyReference.cache
 c:\users\морозов\documents\visual studio 2012\Projects\CodeDoc\CodeDoc\obj\Debug\CodeDoc.dll
 c:\users\морозов\documents\visual studio 2012\Projects\CodeDoc\CodeDoc\obj\Debug\CodeDoc.pdb
+C:\Users\Морозов\Documents\GitHub\Docer\bin\CodeDoc.dll
+C:\Users\Морозов\Documents\GitHub\Docer\bin\CodeDoc.pdb
+C:\Users\Морозов\Documents\GitHub\Docer\obj\Debug\CodeDoc.csprojResolveAssemblyReference.cache
+C:\Users\Морозов\Documents\GitHub\Docer\obj\Debug\CodeDoc.dll
+C:\Users\Морозов\Documents\GitHub\Docer\obj\Debug\CodeDoc.pdb

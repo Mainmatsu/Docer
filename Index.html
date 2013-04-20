@@ -22,24 +22,54 @@
     <title></title>
 </head>
 <body>
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="brand" href="#">Your Company</a>
+                <div class="navbar-content">
+                    <ul class="nav">
+                        <li class="active">
+                            <a href="#">Home</a>
+                        </li>
+                        <li>
+                            <a href="#">About</a>
+                        </li>
+                        <li>
+                            <a href="#">Contact</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span2">
-                <ul class="nav nav-list" data-bind="foreach: abilities">
+
+                <ul class="nav nav-tabs nav-stacked" data-bind="foreach: abilities">
                     <li>
-                        <a data-bind="text: name, tap: $data.abilitieSelect">Home</a>
+                        <a data-bind="tap: $parent.abilitieSelect, style: { backgroundColor: color }">
+                            <span data-bind="text: name"></span>
+                            <input type='checkbox' data-bind="checked: checked, valueUpdate: 'keypress', tap: $parent.abilityCheck" class="pull-right"/>
+                        </a>
                     </li>
                 </ul>
             </div>
             <div class="span10">
+                <button class="btn pull-right btn-primary btn-small" data-toggle="buttons-checkbox" data-bind="click: $data.showHideEditor">Edit <i class="icon-edit"></i></button>
                 <ul class="nav nav-tabs" data-bind="foreach: files">
-                    <li class="active">
-                        <a data-bind="text: name, tap: $parent.fileSelect"></a>
+                    <li data-bind="tap: $parent.fileSelect">
+                        <a data-toggle="tab">
+                            <span data-bind="text: name + ' '"></span><span class="badge">1</span>
+                        </a>
                     </li>
                 </ul>
-                <pre class="prettyprint linenums" data-bind="drag: $data.select, tap: $data.select, html: $data.code"></pre>
-                <textarea id="codeViewer" data-bind="value: $data.code" class="input-block-level" rows="10"></textarea>
-                <textarea ondblclick="prettyPrint()"></textarea>
+                <pre id="codeViewer" class="prettyprint linenums" data-bind="drag: $data.select, tap: $data.select, html: $data.code">
+                    <a class="btn btn-mini">
+                        <i class="icon-edit"></i>
+                    </a>
+                </pre>
+                <textarea id="codeEditor" style="display: none;" data-bind="value: $data.code, valueUpdate: 'keypress'" class="input-block-level" rows="10"></textarea>
             </div>
 
         </div>
@@ -52,6 +82,7 @@
     function ability(name, color) {
         this.name = name;
         this.dependence = null;
+        this.checked = true;
         this.color = color;
     }
 
@@ -59,91 +90,164 @@
         var self = this;
 
         self.name = name;
-        self.showEditor = ko.observable("none");
+        self.showEditor = 'none';
         self.abilities = ko.observableArray();
-        self.selectedAbilitie = ko.observable();
+        self.selectedAbilitie = {};
         self.files = ko.observableArray();
-        self.code = ko.observable('var el = document.createElement("bootstrap");');
+        self.code = ko.observable('no code');
 
-        self.showHideEditor = function (data) {
-            if (self.showEditor() == "none") {
-                self.showEditor('');
+        self.showHideEditor = function () {
+            var editor = document.getElementById("codeEditor");
+            var viewer = document.getElementById("codeViewer");
+            if (editor.style.display == 'none') {
+                editor.style.display = '';
+                viewer.style.display = 'none';
+                codeEditor.codeViewerUpdate();
+                var rowsCount = codeEditor.listMarkedItems.length;
+                editor.setAttribute("rows", rowsCount);
             }
             else {
-                self.showEditor("none");
+                editor.style.display = 'none';
+                viewer.style.display = '';
+                codeEditor.codeViewerUpdate();
             }
+        }
+        self.abilityCheck = function () {
+            ko.utils.arrayForEach(documentation.abilities(), function(ability){
+                codeEditor.showHideOptionalRows(ability);
+            });
+            codeEditor.codeViewerUpdate();
         }
 
         self.fileSelect = function (data, event) {
             self.code(data.code());
+            var $window = $(window)
+            window.prettyPrint && prettyPrint()
         }
         self.abilitieSelect = function (data, event) {
-            self.selectedAbilitie(data);
+            self.selectedAbilitie = data;
         }
+        
 
         self.select = function (data, event) {
             if (event.gesture.target.localName == "li") {
-                event.gesture.target.setAttribute("data-doc", "red");
-                parsDoc();
+                event.gesture.target.setAttribute("data-doc", self.selectedAbilitie.name);
+                codeEditor.codeViewerUpdate();
             }
             if (event.gesture.target.parentNode.localName == "li") {
-                event.gesture.target.parentNode.setAttribute("data-doc", "red");
-                parsDoc();
+                event.gesture.target.parentNode.setAttribute("data-doc", self.selectedAbilitie.name);
+                codeEditor.codeViewerUpdate();
             }
         }
-
     }
+
+    var unrealModel = {
+
+    };
 
     function fileViewModel(name, code) {
         this.name = name;
-        this.code = ko.observable(code || 'var el = document.createElement("bootstrap"); lolka');
+        this.code = ko.observable(code || 'no code');
     }
 
     //-------
     documentation = new documentationViewModel('test');
-    var file = new fileViewModel('Index.html');
-    file.code('var el = document.createElement("bootstrap"); eee');
+    var file = new fileViewModel('Index.html', 'var el = document.createElement("bootstrap");');
+    var file2 = new fileViewModel('Main.cs', 'public void Main() { }');
+    var file3 = new fileViewModel('Index.html', 'var el = document("bootstrap test");');
+    var file4 = new fileViewModel('Main.cs', 'public void Index() { }');
 
-    var ability2 = new ability("Main", "rgba(230, 0, 0, 0.1)");
-    var ability = new ability("Auth", "rgba(0, 120, 201, 0.1)");
 
-    documentation.abilities.push(ability);
+    var ability1 = new ability("Auth", "rgba(255,0,0, 0.1)");
+    var ability2 = new ability("Main", "rgba(0,255,0, 0.1)");
+    var ability3 = new ability("Routes", "rgba(0,0,255, 0.1)");
+    var ability4 = new ability("Comments", "rgba(7,60,5, 0.1)");
+    var ability5 = new ability("Clear", "");
+
+
+    documentation.abilities.push(ability1);
     documentation.abilities.push(ability2);
+    documentation.abilities.push(ability3);
+    documentation.abilities.push(ability4);
+    documentation.abilities.push(ability5);
     documentation.files.push(file);
+    documentation.files.push(file2);
+    documentation.files.push(file3);
+    documentation.files.push(file4);
     //-------
 
     ko.applyBindings(documentation);
 </script>
 <script>
-    var APP_ATTRIBUTE = "data-doc";
+    (function ($window) {
+        var codeEditor = {};
+        codeEditor.APP_ATTRIBUTE = "data-doc";
+        codeEditor.listMarkedItems = [];
 
-    var parsDoc = function () {
-        var elem = document.getElementById("codeViewer");
-        if (elem.children.length > 0) {
-            for (var i in elem.children) {
-                var elem = elem.childrens[i];
-                if (elem.getAttribute) {
-                    var attrValue = elem.getAttribute(APP_ATTRIBUTE);
-                    if (attrValue !== null) {
-                        for (var t in documentation.abilities()) {
-                            var ability = documentation.abilities[t];
-                            if (attrValue == ability.name)
-                                $(elem).css("background-color", ability.color);
+        codeEditor.codeViewerUpdate = function () {
+            if (checkForContent("codeViewer")) {
+
+            } else {
+                window.prettyPrint && prettyPrint()
+            }
+
+            listParser("codeViewer");
+            attrParser();
+        }
+        codeEditor.showHideOptionalRows = function (ability) {
+            listParser("codeViewer");
+            for (var t in codeEditor.listMarkedItems) {
+                var elem = codeEditor.listMarkedItems[t];
+                var elemAttr = elem.getAttribute(codeEditor.APP_ATTRIBUTE);
+                if (elemAttr) {
+                    if (elemAttr == ability.name) {
+                        if (ability.checked) {
+                            elem.style.display = 'none';
+                        } else {
+                            elem.style.display = '';
                         }
                     }
                 }
             }
         }
-    }
 
-    parsDoc();
+        function checkForContent(listElementId) {
+            var elem = document.getElementById(listElementId);
+            if (elem !== undefined && elem.children.length > 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
 
-    !function ($) {
-        $(function () {
-            var $window = $(window)
-            // Запускаем code pretty:
-            window.prettyPrint && prettyPrint()
-        })
-    }(window.jQuery)
+        function listParser(listElementId) {
+            codeEditor.listMarkedItems = [];
+            var elem = document.getElementById(listElementId);
+            if (elem !== undefined && elem.children.length > 0) {
+                var childrens = elem.children[0].children;
+                for (var i in childrens) {
+                    var children = childrens[i];
+                    if (children.tagName == "LI") {
+                        codeEditor.listMarkedItems.push(children);
+                    }
+                }
+            }
+        }
 
+        function attrParser() {
+            for (var t in codeEditor.listMarkedItems) {
+                var elem = codeEditor.listMarkedItems[t];
+                var elemAttr = elem.getAttribute(codeEditor.APP_ATTRIBUTE);
+                if (elemAttr) {
+                    ko.utils.arrayForEach(documentation.abilities(), function (item) {
+                        if (elemAttr == item.name)
+                            elem.style.backgroundColor = item.color;
+                    });
+                }
+            }
+        }
+        window.codeEditor = codeEditor;
+        codeEditor.codeViewerUpdate();
+    }($(window)));
 </script>
